@@ -7,11 +7,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const scoreValue = document.getElementById('score-value');
     const scoreLabel = document.getElementById('score-label');
     const refreshBtn = document.getElementById('refresh-btn');
+    const openTranziaBtn = document.getElementById('open-tranzia-btn');
 
     // Check current tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (tab && tab.url && isGoogleMapsDirections(tab.url)) {
+        // Update Open Tranzia button to pass the current URL
+        openTranziaBtn.href = `https://www.tranzia.com?url=${encodeURIComponent(tab.url)}`;
+
         statusIcon.textContent = '🗺️';
         statusText.textContent = 'Analyzing route safety...';
 
@@ -28,7 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statusText.textContent = response.error;
             } else if (response.routes && response.routes.length > 0) {
                 const route = response.routes[0];
-                displayScore(route.score, route.risk_label);
+                // API returns 'label' not 'risk_label'
+                displayScore(route.score, route.label);
             } else {
                 statusIcon.textContent = '❓';
                 statusText.textContent = 'Could not analyze this route';
