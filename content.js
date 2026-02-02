@@ -266,7 +266,17 @@
             if (response.error) {
                 console.error('[Tranzia] API error:', response.error);
                 routeCards.forEach(card => {
-                    const errorBadge = createErrorBadge('City not supported yet');
+                    const errorBadge = createErrorBadge(response.error);
+                    const insertPoint = card.querySelector('[role="heading"]') || card.firstChild;
+                    if (insertPoint) {
+                        insertPoint.parentNode.insertBefore(errorBadge, insertPoint.nextSibling);
+                    }
+                });
+            } else if (response.success === false) {
+                // API returned success: false with error message
+                console.error('[Tranzia] API returned error:', response.error);
+                routeCards.forEach(card => {
+                    const errorBadge = createErrorBadge(response.error || 'Could not score route');
                     const insertPoint = card.querySelector('[role="heading"]') || card.firstChild;
                     if (insertPoint) {
                         insertPoint.parentNode.insertBefore(errorBadge, insertPoint.nextSibling);
@@ -280,7 +290,8 @@
                 routeCards.forEach((card, index) => {
                     const routeData = response.routes[index] || response.routes[0];
                     const score = routeData.score || 5;
-                    const label = routeData.risk_label || 'Moderate Risk';
+                    // API returns 'label' not 'risk_label'
+                    const label = routeData.label || 'Moderate';
                     const isSafest = routeCards.length > 1 && score === maxScore;
 
                     const badge = createBadge(score, label, isSafest);
@@ -296,6 +307,9 @@
                 });
 
                 console.log('[Tranzia] Badges injected successfully');
+            } else {
+                // No routes in response
+                console.log('[Tranzia] No routes in response:', response);
             }
         } catch (error) {
             console.error('[Tranzia] Error fetching score:', error);
