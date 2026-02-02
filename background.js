@@ -1,7 +1,8 @@
 // Tranzia Chrome Extension - Background Service Worker
 // Handles API calls and caching
 
-const API_BASE = 'https://tranzia.com';
+// Use www to avoid redirect from tranzia.com -> www.tranzia.com
+const API_BASE = 'https://www.tranzia.com';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // In-memory cache for scores
