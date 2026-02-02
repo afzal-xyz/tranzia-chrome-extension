@@ -132,23 +132,23 @@
         badge.className = TRANZIA_BADGE_CLASS;
 
         // Determine color based on score
-        let bgColor, textColor, emoji;
+        let bgColor, textColor;
         if (score >= 7) {
             bgColor = '#10B981'; // Green
             textColor = 'white';
-            emoji = '🛡️';
         } else if (score >= 5) {
             bgColor = '#F59E0B'; // Amber
             textColor = 'white';
-            emoji = '⚠️';
         } else {
             bgColor = '#EF4444'; // Red
             textColor = 'white';
-            emoji = '🚨';
         }
 
+        // Use Tranzia logo instead of emoji
+        const logoUrl = chrome.runtime.getURL('icons/logo.png');
+
         badge.innerHTML = `
-      <span class="tranzia-emoji">${emoji}</span>
+      <img src="${logoUrl}" alt="Tranzia" class="tranzia-logo" style="width: 16px; height: 16px; border-radius: 3px;">
       <span class="tranzia-score">${score.toFixed(1)}</span>
       <span class="tranzia-label">${label}</span>
       ${isSafest ? '<span class="tranzia-safest">✓ Safest</span>' : ''}
@@ -185,8 +185,10 @@
     function createLoadingBadge() {
         const badge = document.createElement('div');
         badge.className = TRANZIA_BADGE_CLASS;
+        const logoUrl = chrome.runtime.getURL('icons/logo.png');
         badge.innerHTML = `
-      <span class="tranzia-loading">🛡️ Loading safety score...</span>
+      <img src="${logoUrl}" alt="Tranzia" style="width: 16px; height: 16px; border-radius: 3px;">
+      <span class="tranzia-loading">Loading...</span>
     `;
         badge.style.cssText = `
       display: inline-flex;
