@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tranzia - Route Safety</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="logo">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">Tranzia</span>
+      </div>
+      <span class="tagline">Route Safety Scores</span>
+    </header>
+    
+    <main class="popup-content">
+      <div id="status-container">
+        <div id="status-icon" class="status-icon">📍</div>
+        <div id="status-text" class="status-text">
+          Open Google Maps directions to see safety scores
+        </div>
+      </div>
+      
+      <div id="score-container" class="score-container hidden">
+        <div class="score-display">
+          <span id="score-value" class="score-value">--</span>
+          <span class="score-max">/ 10</span>
+        </div>
+        <div id="score-label" class="score-label">--</div>
+      </div>
+      
+      <div class="actions">
+        <a href="https://tranzia.com" target="_blank" class="btn btn-primary">
+          Open Tranzia
+        </a>
+        <button id="refresh-btn" class="btn btn-secondary">
+          Refresh Score
+        </button>
+      </div>
+    </main>
+    
+    <footer class="popup-footer">
+      <a href="https://tranzia.com/about" target="_blank">About</a>
+      <span class="divider">•</span>
+      <a href="https://tranzia.com/api" target="_blank">API</a>
+      <span class="divider">•</span>
+      <span class="version">v1.0.0</span>
+    </footer>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
