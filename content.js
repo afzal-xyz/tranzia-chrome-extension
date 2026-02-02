@@ -83,16 +83,44 @@
             '[data-trip-index]',                    // Main route cards
             '.section-directions-trip',             // Alternative layout
             '[role="listitem"][data-index]',        // List items
-            '.directions-mode-group-list-item'      // Another layout
+            '.directions-mode-group-list-item',     // Another layout
+            '[data-index][role="button"]',          // Button-style route cards
+            '.XjkvGb',                              // Route summary card class
+            '[data-trip-id]',                       // Alternative trip identifier
+            'div[data-value][role="radio"]',        // Radio button routes
+            '.X3PoYd',                              // Walking/transit route option
         ];
 
         for (const selector of selectors) {
             const cards = document.querySelectorAll(selector);
             if (cards.length > 0) {
+                console.log(`[Tranzia] Found ${cards.length} route cards with selector: ${selector}`);
                 return Array.from(cards);
             }
         }
 
+        // Fallback: look for elements containing route info
+        const fallbackSelectors = [
+            // Look for "via" text which appears in route descriptions
+            'div:has(> span):has(> span:contains("via"))',
+        ];
+
+        // Try to find by text content
+        const allDivs = document.querySelectorAll('div');
+        const routeDivs = Array.from(allDivs).filter(div => {
+            const text = div.textContent || '';
+            const hasVia = text.includes('via ') && (text.includes(' min') || text.includes(' hr'));
+            const isSmall = div.children.length < 10;
+            const hasTime = /\d+\s*(min|hr|hour)/.test(text);
+            return hasVia && isSmall && hasTime && div.offsetHeight > 40;
+        });
+
+        if (routeDivs.length > 0) {
+            console.log(`[Tranzia] Found ${routeDivs.length} route cards via text matching`);
+            return routeDivs.slice(0, 5); // Limit to reasonable number
+        }
+
+        console.log('[Tranzia] No route cards found with any selector');
         return [];
     }
 
