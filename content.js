@@ -78,46 +78,75 @@
      * Find route cards in the Google Maps UI
      */
     function findRouteCards() {
-        // Multiple selectors for different Google Maps layouts
+        // Broad selectors for various Google Maps layouts
         const selectors = [
-            '[data-trip-index]',                    // Main route cards
-            '.section-directions-trip',             // Alternative layout
-            '[role="listitem"][data-index]',        // List items
-            '.directions-mode-group-list-item',     // Another layout
-            '[data-index][role="button"]',          // Button-style route cards
-            '.XjkvGb',                              // Route summary card class
-            '[data-trip-id]',                       // Alternative trip identifier
-            'div[data-value][role="radio"]',        // Radio button routes
-            '.X3PoYd',                              // Walking/transit route option
+            '[data-trip-index]',
+            '.section-directions-trip',
+            '[role="listitem"]', // More generic
+            '.directions-mode-group-list-item',
+            '[data-index][role="button"]',
+            '.XjkvGb',
+            '[data-trip-id]',
+            'div[data-value][role="radio"]',
+            '.X3PoYd',
+            '#section-directions-trip-0', // ID based specific checks
+            '#section-directions-trip-1',
+            '#section-directions-trip-2'
         ];
 
+        // 1. Try specific selectors first
         for (const selector of selectors) {
             const cards = document.querySelectorAll(selector);
-            if (cards.length > 0) {
-                console.log(`[Tranzia] Found ${cards.length} route cards with selector: ${selector}`);
-                return Array.from(cards);
+            // Filter to ensure it looks like a route card (has time/dist or "via")
+            const validCards = Array.from(cards).filter(card => {
+                const text = card.textContent || '';
+                // Must have time (min/hr) OR "via" OR distance (miles/km)
+                // Relaxed check to catch more valid cards
+                return /\d+\s*(min|hr|h)|via\s|miles|km/.test(text.toLowerCase());
+            });
+
+            if (validCards.length > 0) {
+                console.log(`[Tranzia] Found ${validCards.length} route cards with selector: ${selector}`);
+                return validCards;
             }
         }
 
-        // Fallback: look for elements containing route info
-        const fallbackSelectors = [
-            // Look for "via" text which appears in route descriptions
-            'div:has(> span):has(> span:contains("via"))',
-        ];
-
-        // Try to find by text content
-        const allDivs = document.querySelectorAll('div');
+        // 2. Fallback: Text content matching (more robust)
+        const allDivs = document.querySelectorAll('div, button, [role="button"]');
         const routeDivs = Array.from(allDivs).filter(div => {
-            const text = div.textContent || '';
-            const hasVia = text.includes('via ') && (text.includes(' min') || text.includes(' hr'));
-            const isSmall = div.children.length < 10;
-            const hasTime = /\d+\s*(min|hr|hour)/.test(text);
-            return hasVia && isSmall && hasTime && div.offsetHeight > 40;
+            // Optimization: Skip hidden or tiny elements
+            if (div.offsetHeight && div.offsetHeight < 30) return false;
+
+            const text = (div.textContent || '').toLowerCase();
+
+            // Check for "via" + duration pattern
+            // Matches: "via broadway ... 15 min" or "15 min ... via broadway"
+            const hasVia = text.includes('via ');
+            const hasTime = /\d+\s*(min|hr|h)/.test(text);
+
+            // Must have both "via" and time to be a route card
+            const isRouteCard = hasVia && hasTime;
+
+            // Avoid nested matches: ensure this isn't just a container of the list
+            // A route card usually isn't massive (height < 300px)
+            const isReasonableSize = div.offsetHeight && div.offsetHeight < 300;
+
+            // Filter out the main container
+            const isNotContainer = div.childElementCount < 20;
+
+            return isRouteCard && isReasonableSize && isNotContainer;
         });
 
         if (routeDivs.length > 0) {
+            // De-duplicate nested elements (pick the smallest specific card)
+            // Sort by size (ascending) to get the inner-most card
+            routeDivs.sort((a, b) => (a.textContent.length - b.textContent.length));
+
+            // Heuristic cleaning: remove parents if children are already selected
+            // For simple cases, just taking the first few distinct ones usually works
+            // or just limiting to reasonable count
             console.log(`[Tranzia] Found ${routeDivs.length} route cards via text matching`);
-            return routeDivs.slice(0, 5); // Limit to reasonable number
+            return routeDivs.slice(0, 10);
         }
 
         console.log('[Tranzia] No route cards found with any selector');
