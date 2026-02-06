@@ -1,11 +1,10 @@
 {
     "manifest_version": 3,
     "name": "Tranzia - Route Safety Scores",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "See safety scores for your Google Maps routes. Know how safe your route is before you go.",
     "permissions": [
-        "activeTab",
-        "storage"
+        "activeTab"
     ],
     "host_permissions": [
         "https://www.google.com/maps/*",
